@@ -1,0 +1,89 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "Middleware.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/Middleware.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Middleware.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Middleware.Core/1.0.0": {
+      "type": "project",
+      "path": "../Middleware.Core/Middleware.Core.csproj",
+      "msbuildProject": "../Middleware.Core/Middleware.Core.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "Middleware.Core >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "/home/linkdicom/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
+      "projectName": "Middleware.API",
+      "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
+      "packagesPath": "/home/linkdicom/.nuget/packages/",
+      "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/home/linkdicom/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj": {
+              "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.123/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
