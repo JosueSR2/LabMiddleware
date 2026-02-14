@@ -1,26 +1,31 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
+using System.IO.Ports;
+using Middleware.Core.Parsers;
 
 namespace Middleware.Core.Parsers
 {
     public static class ParserFactory
     {
-        /// <summary>
-        /// Detecta el parser adecuado según el contenido del mensaje o la extensión del archivo
-        /// </summary>
         public static IAnalyzerParser GetParser(string fileName, string rawMessage)
         {
-            string ext = Path.GetExtension(fileName).ToLower();
+            // Detectar por contenido (más robusto que por extensión)
 
-            if (ext == ".hl7" || rawMessage.StartsWith("H|"))
+            if (rawMessage.Contains("MSH|"))
+            {
+                Console.WriteLine("[ParserFactory] HL7 detected");
                 return new Hl7Parser();
-            else if (ext == ".astm" || rawMessage.StartsWith(((char)0x02).ToString()))
-                return new DimensionParser();
-            else if (ext == ".csv" || rawMessage.Contains(","))
-                return new CsvParser();
+            }
 
-            throw new NotSupportedException($"No se encontró un parser compatible para {fileName}");
+            if (rawMessage.Contains("H|\\^&") || rawMessage.StartsWith("H|"))
+            {
+                Console.WriteLine("[ParserFactory] ASTM detected");
+                return new AstmParser();
+            }
+
+            throw new NotSupportedException("Unknown analyzer format");
         }
-
     }
 }
+
+

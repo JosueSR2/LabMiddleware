@@ -1,8 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "+U0C+XUTd/Y4/TQv81d4gcKGc6l8snPQODxkonnEUYzEbslB4uH9eF4K34EUPKAWeTb2h1jz/RHme5ZUls1N8w==",
+  "dgSpecHash": "YyE28e1aHjmM42jwlidjwEotiYyba22t2zh6b9Cuz4Jwo7/h5jS7As+Yji/fXR3EzDB/IzuWXFH+rgyh6qTJ1Q==",
   "success": true,
   "projectFilePath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/linkdicom/.nuget/packages/runtime.linux-arm.runtime.native.system.io.ports/8.0.0/runtime.linux-arm.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/runtime.linux-arm64.runtime.native.system.io.ports/8.0.0/runtime.linux-arm64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/runtime.linux-x64.runtime.native.system.io.ports/8.0.0/runtime.linux-x64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/runtime.native.system.io.ports/8.0.0/runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/runtime.osx-arm64.runtime.native.system.io.ports/8.0.0/runtime.osx-arm64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/runtime.osx-x64.runtime.native.system.io.ports/8.0.0/runtime.osx-x64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
+    "/home/linkdicom/.nuget/packages/system.io.ports/8.0.0/system.io.ports.8.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

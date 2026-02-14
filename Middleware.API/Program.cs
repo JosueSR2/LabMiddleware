@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Middleware.Core.Receivers;
 using Middleware.Core.Parsers;
 using Middleware.Core.Services;
 
@@ -27,6 +28,33 @@ var fileMonitor = new FileMonitoringService(
     lisUrl
 );
 fileMonitor.Start();
+
+var tcpReceiver = new TcpReceiver(5001, rawMessage =>
+{
+    ProcessIncomingMessage(rawMessage);
+});
+
+void ProcessIncomingMessage(string rawMessage)
+{
+    try
+    {
+        var format = AnalyzerFormatDetector.Detect(rawMessage);
+        var parser = ParserFactory.GetParser(string.Empty, rawMessage);
+
+        var results = parser.Parse(rawMessage);
+
+        foreach (var result in results)
+        {
+            Console.WriteLine($"Processed: {result.SampleId} - {result.TestCode} = {result.Value}");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[ERROR] {ex.Message}");
+    }
+}
+
+tcpReceiver.Start();
 
 // Endpoint mínimo
 app.MapGet("/", () => "Middleware running...");

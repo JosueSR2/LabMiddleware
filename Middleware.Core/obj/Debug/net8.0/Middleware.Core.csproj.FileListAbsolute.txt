@@ -10,3 +10,4 @@
 /home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/refint/Middleware.Core.dll
 /home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.pdb
 /home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/ref/Middleware.Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.csproj.AssemblyReference.cache
