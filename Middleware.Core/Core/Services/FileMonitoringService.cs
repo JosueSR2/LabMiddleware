@@ -60,6 +60,5 @@ namespace Middleware.Core.Services
                 Console.WriteLine($"[Middleware] Error processing file {e.Name}: {ex.Message}");
             }
         }
-
     }
 }
