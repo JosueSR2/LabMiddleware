@@ -8,18 +8,15 @@ namespace Middleware.Core.Services
     public class FileMonitoringService
     {
         private readonly string _watchFolder;
-        private readonly AnalyzerMessageProcessor _processor;
         private readonly LisSenderService _lisSender;
         private readonly string _lisUrl;
 
         public FileMonitoringService(
             string watchFolder,
-            AnalyzerMessageProcessor processor,
             LisSenderService lisSender,
             string lisUrl)
         {
             _watchFolder = watchFolder;
-            _processor = processor;
             _lisSender = lisSender;
             _lisUrl = lisUrl;
         }
@@ -35,25 +32,34 @@ namespace Middleware.Core.Services
             Console.WriteLine($"[Middleware] Monitoring folder: {_watchFolder}");
         }
 
-        private async void OnFileCreated(object sender, FileSystemEventArgs e)
+        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        {
+            _ = ProcessFileAsync(e);
+        }
+
+        private async Task ProcessFileAsync(FileSystemEventArgs e)
         {
             try
             {
+                if (!File.Exists(e.FullPath))
+                    return;
+
                 Console.WriteLine($"[Middleware] File detected: {e.Name}");
 
-                await Task.Delay(500); // Esperar a que se termine de escribir
+                await Task.Delay(500);
 
-                string rawMessage = File.ReadAllText(e.FullPath);
+                string rawMessage = await File.ReadAllTextAsync(e.FullPath);
 
-                // Detectar automáticamente el parser
-                var parser = ParserFactory.GetParser(e.Name, rawMessage);
+                var fileName = Path.GetFileName(e.FullPath) ?? string.Empty;
+
+                var parser = ParserFactory.GetParser(fileName, rawMessage);
 
                 var processor = new AnalyzerMessageProcessor(parser);
                 string hl7Message = processor.Process(rawMessage);
 
                 await _lisSender.SendAsync(hl7Message, _lisUrl);
 
-                Console.WriteLine($"[Middleware] File processed and sent: {e.Name}");
+                Console.WriteLine($"[Middleware] File processed and sent: {fileName}");
             }
             catch (Exception ex)
             {

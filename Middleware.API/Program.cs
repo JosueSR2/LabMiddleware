@@ -16,17 +16,13 @@ var app = builder.Build();
 string watchFolder = "/home/linkdicom/Proyectos/LabMiddleware/TestingResources";
 string lisUrl = "http://localhost:5284/api/Analyzer/receive-result";
 
-// Crear parser y processor
-var parser = new DimensionParser();
-var processor = new AnalyzerMessageProcessor(parser);
-
 // Iniciar servicio de monitoreo
 var fileMonitor = new FileMonitoringService(
     watchFolder,
-    processor,
     app.Services.GetRequiredService<LisSenderService>(),
     lisUrl
 );
+
 fileMonitor.Start();
 
 var tcpReceiver = new TcpReceiver(5001, rawMessage =>

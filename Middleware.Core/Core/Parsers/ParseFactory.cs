@@ -9,8 +9,6 @@ namespace Middleware.Core.Parsers
     {
         public static IAnalyzerParser GetParser(string fileName, string rawMessage)
         {
-            // Detectar por contenido (más robusto que por extensión)
-
             if (rawMessage.Contains("MSH|"))
             {
                 Console.WriteLine("[ParserFactory] HL7 detected");
@@ -23,7 +21,8 @@ namespace Middleware.Core.Parsers
                 return new AstmParser();
             }
 
-            throw new NotSupportedException("Unknown analyzer format");
+            Console.WriteLine("[ParserFactory] Unknown format → using GenericTextParser");
+            return new GenericTextParser();
         }
     }
 }
