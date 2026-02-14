@@ -1,0 +1,12 @@
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/bin/Debug/net8.0/Middleware.Core.deps.json
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/bin/Debug/net8.0/Middleware.Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/bin/Debug/net8.0/Middleware.Core.pdb
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.AssemblyInfoInputs.cache
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.AssemblyInfo.cs
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.csproj.CoreCompileInputs.cache
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.sourcelink.json
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/refint/Middleware.Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/Middleware.Core.pdb
+/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/Debug/net8.0/ref/Middleware.Core.dll

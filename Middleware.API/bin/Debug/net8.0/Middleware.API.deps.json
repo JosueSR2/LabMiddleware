@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Middleware.API/1.0.0": {
+        "dependencies": {
+          "Middleware.Core": "1.0.0"
+        },
+        "runtime": {
+          "Middleware.API.dll": {}
+        }
+      },
+      "Middleware.Core/1.0.0": {
+        "runtime": {
+          "Middleware.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Middleware.API/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Middleware.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
