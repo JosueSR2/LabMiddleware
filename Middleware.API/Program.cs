@@ -12,7 +12,7 @@ builder.Services.AddHttpClient<LisSenderService>();
 var app = builder.Build();
 
 // Configuración carpeta y URL LIS
-string watchFolder = @"C:\Laboratory\TestingResources";
+string watchFolder = "/home/linkdicom/Proyectos/LabMiddleware/TestingResources";
 string lisUrl = "http://localhost:5284/api/Analyzer/receive-result";
 
 // Crear parser y processor
