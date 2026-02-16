@@ -1,71 +1,63 @@
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Middleware_Core.Models;
 using Middleware_Core.Parsers;
 
 namespace Middleware_Core.Services
 {
     public class FileMonitoring
     {
-        private readonly HttpClient _httpClient;
+        private readonly string _watchFolder;
+        private readonly LisSenderService _lisSender;
+        private readonly string _lisUrl;
+        private FileSystemWatcher? _watcher;
 
-        public FileMonitoring(HttpClient httpClient)
+        public FileMonitoring(string watchFolder, LisSenderService lisSender, string lisUrl)
         {
-            _httpClient = httpClient;
+            _watchFolder = watchFolder;
+            _lisSender = lisSender;
+            _lisUrl = lisUrl;
         }
 
-        public async Task ProcessFileAsync(string filePath)
+        public void Start()
         {
-            if (!File.Exists(filePath))
-                return;
-
-            var rawMessage = await File.ReadAllTextAsync(filePath);
-
-            // 🔥 Aquí usamos tu ParserFactory
-            IAnalyzerParser parser = ParserFactory.GetParser(filePath, rawMessage);
-
-            var results = parser.Parse(rawMessage);
-
-            foreach (var result in results)
+            if (!Directory.Exists(_watchFolder))
             {
-                await SendAsync(result);
+                Directory.CreateDirectory(_watchFolder);
             }
+
+            _watcher = new FileSystemWatcher(_watchFolder)
+            {
+                EnableRaisingEvents = true,
+                IncludeSubdirectories = false
+            };
+
+            _watcher.Created += OnFileCreated;
+
+            Console.WriteLine($"📁 Watching folder: {_watchFolder}");
         }
 
-        private async Task SendAsync(LabResult result)
+        private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            var json = JsonSerializer.Serialize(new
+            try
             {
-                sampleId = result.SampleId,
-                patientName = result.PatientName,
-                testCode = result.TestCode,
-                testName = result.TestName,
-                value = result.Value,
-                units = result.Units,
-                flag = result.Flag,
-                timestamp = result.Timestamp,
-                source = result.SourceMachine
-            });
+                await Task.Delay(500); // Esperar que el archivo termine de escribirse
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var rawMessage = await File.ReadAllTextAsync(e.FullPath);
 
-            var response = await _httpClient.PostAsync(
-                "http://openelis/api/results",
-                content);
+                var parser = ParserFactory.GetParser(e.Name, rawMessage);
+                var results = parser.Parse(rawMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Error enviando resultado: {response.StatusCode}");
+                foreach (var result in results)
+                {
+                    await _lisSender.SendAsync(result, _lisUrl);
+                    Console.WriteLine($"✔ Sent: {result.SampleId} - {result.TestCode}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Resultado enviado correctamente.");
+                Console.WriteLine($"[FileMonitoring ERROR] {ex.Message}");
             }
         }
     }
 }
-

@@ -12,7 +12,7 @@ namespace Middleware_Core.Parsers
             var results = new List<LabResult>();
             using (var reader = new StringReader(rawMessage))
             {
-                string line;
+                string? line;
                 string sampleId = "";
                 string patientName = "";
 

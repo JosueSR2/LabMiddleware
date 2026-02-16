@@ -6,7 +6,7 @@ namespace Middleware_Core.Services
 {
     public abstract class BackgroundService : IDisposable
     {
-        private Task _executingTask;
+        private Task? _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 
         protected abstract Task ExecuteAsync(CancellationToken stoppingToken);

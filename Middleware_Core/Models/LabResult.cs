@@ -4,7 +4,7 @@ namespace Middleware_Core.Models
     {
         public Guid Id { get; set; }
             
-        public string SampleId { get; set; }
+        public string? SampleId { get; set; }
         public string PatientName { get; set; }
         public string PatientId { get; set; }
         public string TestCode { get; set; }

@@ -1,30 +1,35 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Middleware_Core.Builders;
 using Middleware_Core.Parsers;
-using Middleware_Core.Utils;
+using Middleware_Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registrar HttpClient para LIS
-builder.Services.AddHttpClient<LisSenderService>();
+// Registrar servicios
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<LisSenderService>();
 
 var app = builder.Build();
 
-// Configuración carpeta y URL LIS
+// Configuración
 string watchFolder = "/home/linkdicom/Proyectos/LabMiddleware/TestingResources";
 string lisUrl = "http://localhost:5284/api/Analyzer/receive-result";
 
-// Iniciar servicio de monitoreo
-var fileMonitor = new FileMonitoringService(
+// Obtener servicios
+var httpClientFactory = app.Services.GetRequiredService<IHttpClientFactory>();
+var httpClient = httpClientFactory.CreateClient();
+
+var lisSender = app.Services.GetRequiredService<LisSenderService>();
+
+// Iniciar monitoreo
+var fileMonitor = new FileMonitoring(
     watchFolder,
-    app.Services.GetRequiredService<LisSenderService>(),
+    lisSender,
     lisUrl
 );
 
 fileMonitor.Start();
 
+// TCP Receiver
 var tcpReceiver = new TcpReceiver(5001, rawMessage =>
 {
     ProcessIncomingMessage(rawMessage);
@@ -34,9 +39,7 @@ void ProcessIncomingMessage(string rawMessage)
 {
     try
     {
-        var format = AnalyzerFormatDetector.Detect(rawMessage);
         var parser = ParserFactory.GetParser(string.Empty, rawMessage);
-
         var results = parser.Parse(rawMessage);
 
         foreach (var result in results)
@@ -52,8 +55,6 @@ void ProcessIncomingMessage(string rawMessage)
 
 tcpReceiver.Start();
 
-// Endpoint mínimo
 app.MapGet("/", () => "Middleware running...");
 
 app.Run();
-

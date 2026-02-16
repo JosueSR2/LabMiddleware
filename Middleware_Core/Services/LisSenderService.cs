@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Middleware_Core.Core.Repositories;
+using Middleware_Core.Models;
 
 namespace Middleware_Core.Services
 {
@@ -16,6 +17,18 @@ namespace Middleware_Core.Services
             _httpClient = httpClient;
             _repository = repository;
         }
+
+        public async Task SendAsync(LabResult result, string lisUrl)
+        {
+            var json = JsonSerializer.Serialize(result);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(lisUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+                Console.WriteLine("Error sending to LIS");
+        }
+
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
