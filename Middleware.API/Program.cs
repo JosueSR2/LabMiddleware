@@ -12,7 +12,8 @@ var app = builder.Build();
 
 // Configuración
 string watchFolder = "/home/linkdicom/Proyectos/LabMiddleware/TestingResources";
-string lisUrl = "http://localhost:5284/api/Analyzer/receive-result";
+string lisUrl = "http://localhost:8080/OpenELIS-Global/middleware/receive-result";
+
 
 // Obtener servicios
 var httpClientFactory = app.Services.GetRequiredService<IHttpClientFactory>();
