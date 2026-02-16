@@ -1,12 +1,16 @@
-namespace Middleware.Core.Models
+namespace Middleware_Core.Models
 {
     public class LabResult
     {
+        public Guid Id { get; set; }
+            
         public string SampleId { get; set; }
         public string PatientName { get; set; }
+        public string PatientId { get; set; }
         public string TestCode { get; set; }
         public string TestName { get; set; }
         public string Value { get; set; }
+        public string Unit { get; set; }
         public string Units { get; set; }
         public string Flag { get; set; } 
         public string AnalyzerId { get; set; }

@@ -1,6 +1,6 @@
-using Middleware.Core.Core.Models;
+using Middleware_Core.Models;
 
-namespace Middleware.Core.Core.Repositories
+namespace Middleware_Core.Core.Repositories
 {
     public interface IResultRepository
     {

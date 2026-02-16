@@ -1,9 +1,9 @@
-using Middleware.Core.Models;
+using Middleware_Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Middleware.Core.Parsers
+namespace Middleware_Core.Parsers
 {
     public class CsvParser : IAnalyzerParser
     {

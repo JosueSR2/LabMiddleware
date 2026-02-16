@@ -1,7 +1,7 @@
-using Middleware.Core.Parsers;
-using Middleware.Core.Builders;
+using Middleware_Core.Parsers;
+using Middleware_Core.Builders;
 
-namespace Middleware.Core.Services
+namespace Middleware_Core.Services
 {
     public class AnalyzerMessageProcessor
     {

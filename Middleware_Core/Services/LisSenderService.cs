@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
-using Middleware.Core.Core.Models;
-using Middleware.Core.Core.Repositories;
+using System.Threading;
+using System.Threading.Tasks;
+using Middleware_Core.Core.Repositories;
 
-namespace Middleware.Core.Services
+namespace Middleware_Core.Services
 {
     public class LisSenderService : BackgroundService
     {
@@ -39,7 +39,8 @@ namespace Middleware.Core.Services
 
                     var response = await _httpClient.PostAsync(
                         "http://openelis/api/results",
-                        content);
+                        content,
+                        stoppingToken);
 
                     if (response.IsSuccessStatusCode)
                         await _repository.MarkAsSent(result.Id);
@@ -52,3 +53,4 @@ namespace Middleware.Core.Services
         }
     }
 }
+

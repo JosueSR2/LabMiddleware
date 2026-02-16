@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Middleware.Core.Receivers
+namespace Middleware_Core.Receivers
 {
     public class TcpReceiver
     {

@@ -1,69 +1,9 @@
 {
   "format": 1,
   "restore": {
-    "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj": {}
+    "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj": {}
   },
   "projects": {
-    "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
-        "projectName": "Middleware.Core",
-        "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
-        "packagesPath": "/home/linkdicom/.nuget/packages/",
-        "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/obj/",
-        "projectStyle": "PackageReference",
-        "configFilePaths": [
-          "/home/linkdicom/.nuget/NuGet/NuGet.Config"
-        ],
-        "originalTargetFrameworks": [
-          "net8.0"
-        ],
-        "sources": {
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
-            "projectReferences": {
-              "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj": {
-                "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        }
-      },
-      "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.AspNetCore.App": {
-              "privateAssets": "none"
-            },
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.124/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
     "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj": {
       "version": "1.0.0",
       "restore": {

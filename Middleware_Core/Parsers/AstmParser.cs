@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Middleware.Core.Models;
+using Middleware_Core.Models;
 
-namespace Middleware.Core.Parsers
+namespace Middleware_Core.Parsers
 {
     public class AstmParser : IAnalyzerParser
     {

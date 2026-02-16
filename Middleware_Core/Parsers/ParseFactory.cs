@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.IO.Ports;
-using Middleware.Core.Parsers;
+using Middleware_Core.Parsers;
 
-namespace Middleware.Core.Parsers
+namespace Middleware_Core.Parsers
 {
     public static class ParserFactory
     {

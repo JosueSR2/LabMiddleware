@@ -1,70 +1,71 @@
 using System;
 using System.IO;
-using Middleware.Core.Parsers;
-using Middleware.Core.Services;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Middleware_Core.Models;
+using Middleware_Core.Parsers;
 
-namespace Middleware.Core.Services
+namespace Middleware_Core.Services
 {
-    public class FileMonitoringService
+    public class FileMonitoring
     {
-        private readonly string _watchFolder;
-        private readonly LisSenderService _lisSender;
-        private readonly string _lisUrl;
+        private readonly HttpClient _httpClient;
 
-        public FileMonitoringService(
-            string watchFolder,
-            LisSenderService lisSender,
-            string lisUrl)
+        public FileMonitoring(HttpClient httpClient)
         {
-            _watchFolder = watchFolder;
-            _lisSender = lisSender;
-            _lisUrl = lisUrl;
+            _httpClient = httpClient;
         }
 
-        public void Start()
+        public async Task ProcessFileAsync(string filePath)
         {
-            var watcher = new FileSystemWatcher(_watchFolder);
-            watcher.Filter = "*.*";
-            watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
-            watcher.Created += OnFileCreated;
-            watcher.EnableRaisingEvents = true;
+            if (!File.Exists(filePath))
+                return;
 
-            Console.WriteLine($"[Middleware] Monitoring folder: {_watchFolder}");
-        }
+            var rawMessage = await File.ReadAllTextAsync(filePath);
 
-        private void OnFileCreated(object sender, FileSystemEventArgs e)
-        {
-            _ = ProcessFileAsync(e);
-        }
+            // 🔥 Aquí usamos tu ParserFactory
+            IAnalyzerParser parser = ParserFactory.GetParser(filePath, rawMessage);
 
-        private async Task ProcessFileAsync(FileSystemEventArgs e)
-        {
-            try
+            var results = parser.Parse(rawMessage);
+
+            foreach (var result in results)
             {
-                if (!File.Exists(e.FullPath))
-                    return;
-
-                Console.WriteLine($"[Middleware] File detected: {e.Name}");
-
-                await Task.Delay(500);
-
-                string rawMessage = await File.ReadAllTextAsync(e.FullPath);
-
-                var fileName = Path.GetFileName(e.FullPath) ?? string.Empty;
-
-                var parser = ParserFactory.GetParser(fileName, rawMessage);
-
-                var processor = new AnalyzerMessageProcessor(parser);
-                string hl7Message = processor.Process(rawMessage);
-
-                await _lisSender.SendAsync(hl7Message, _lisUrl);
-
-                Console.WriteLine($"[Middleware] File processed and sent: {fileName}");
+                await SendAsync(result);
             }
-            catch (Exception ex)
+        }
+
+        private async Task SendAsync(LabResult result)
+        {
+            var json = JsonSerializer.Serialize(new
             {
-                Console.WriteLine($"[Middleware] Error processing file {e.Name}: {ex.Message}");
+                sampleId = result.SampleId,
+                patientName = result.PatientName,
+                testCode = result.TestCode,
+                testName = result.TestName,
+                value = result.Value,
+                units = result.Units,
+                flag = result.Flag,
+                timestamp = result.Timestamp,
+                source = result.SourceMachine
+            });
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(
+                "http://openelis/api/results",
+                content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Error enviando resultado: {response.StatusCode}");
+            }
+            else
+            {
+                Console.WriteLine("Resultado enviado correctamente.");
             }
         }
     }
 }
+

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Middleware.Core.Receivers;
-using Middleware.Core.Parsers;
-using Middleware.Core.Services;
+using Middleware_Core.Builders;
+using Middleware_Core.Parsers;
+using Middleware_Core.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 

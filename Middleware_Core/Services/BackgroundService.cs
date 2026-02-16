@@ -1,97 +1,44 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Middleware.Core.Core.Services
+namespace Middleware_Core.Services
 {
-    public class LisSenderService : BackgroundService
+    public abstract class BackgroundService : IDisposable
     {
-        private readonly ILogger<LisSenderService> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IResultRepository _repository;
+        private Task _executingTask;
+        private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 
-        private const string OpenElisEndpoint = "https://your-openelis-server/api/results";
-        private const string Username = "your-username";
-        private const string Password = "your-password";
+        protected abstract Task ExecuteAsync(CancellationToken stoppingToken);
 
-        public LisSenderService(
-            ILogger<LisSenderService> logger,
-            IHttpClientFactory httpClientFactory,
-            IResultRepository repository)
+        public virtual Task StartAsync()
         {
-            _logger = logger;
-            _httpClientFactory = httpClientFactory;
-            _repository = repository;
+            _executingTask = ExecuteAsync(_stoppingCts.Token);
+
+            if (_executingTask.IsCompleted)
+                return _executingTask;
+
+            return Task.CompletedTask;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public virtual async Task StopAsync()
         {
-            _logger.LogInformation("LisSenderService iniciado.");
+            if (_executingTask == null)
+                return;
 
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                try
-                {
-                    var pendingResults = await _repository.GetPendingAsync();
-
-                    foreach (var result in pendingResults)
-                    {
-                        await SendResultAsync(result);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error general en LisSenderService");
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-            }
-
-            _logger.LogInformation("LisSenderService detenido.");
-        }
-
-        private async Task SendResultAsync(LabResult result)
-        {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-
-                var byteArray = Encoding.ASCII.GetBytes($"{Username}:{Password}");
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-                var json = JsonSerializer.Serialize(new
-                {
-                    sampleId = result.SampleId,
-                    patientId = result.PatientId,
-                    analyzerId = result.AnalyzerId,
-                    testCode = result.TestCode,
-                    value = result.Value,
-                    unit = result.Unit
-                });
-
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync(OpenElisEndpoint, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    await _repository.MarkAsSent(result.Id);
-                    _logger.LogInformation($"Resultado {result.Id} enviado correctamente.");
-                }
-                else
-                {
-                    await _repository.IncrementRetry(result.Id);
-                    _logger.LogWarning($"Error enviando resultado {result.Id}. Status: {response.StatusCode}");
-                }
+                _stoppingCts.Cancel();
             }
-            catch (Exception ex)
+            finally
             {
-                await _repository.IncrementRetry(result.Id);
-                _logger.LogError(ex, $"Excepción enviando resultado {result.Id}");
+                await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite));
             }
+        }
+
+        public void Dispose()
+        {
+            _stoppingCts.Cancel();
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.IO.Ports;
 using System.Text;
 
-namespace Middleware.Core.Receivers
+namespace Middleware_Core.Receivers
 {
     public class SerialReceiver
     {

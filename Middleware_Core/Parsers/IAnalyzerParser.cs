@@ -1,8 +1,8 @@
-using Middleware.Core.Models;
+using Middleware_Core.Models;
 using System.Collections.Generic;
 
 
-namespace Middleware.Core.Parsers
+namespace Middleware_Core.Parsers
 {
     public interface IAnalyzerParser
     {

@@ -2,24 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Middleware_Core.Models;
-public static class Hl7Builder
+
+namespace Middleware_Core.Builders
 {
-    public static string Build(List<LabResult> results)
+
+    public static class Hl7Builder
     {
-        var sb = new StringBuilder();
-        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-
-        sb.AppendLine($"MSH|^~\\&|Middleware|Lab|OpenELIS|Server|{timestamp}||ORU^R01|1234|P|2.3");
-        sb.AppendLine($"PID|1||{results[0].SampleId}|{results[0].PatientName}");
-
-        int index = 1;
-        foreach (var result in results)
+        public static string Build(List<LabResult> results)
         {
-            sb.AppendLine($"OBX|{index}|NM|{result.TestCode}^{result.TestName}||{result.Value}|{result.Units}|||{result.Flag}");
-            index++;
+            var sb = new StringBuilder();
+            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            sb.AppendLine($"MSH|^~\\&|Middleware|Lab|OpenELIS|Server|{timestamp}||ORU^R01|1234|P|2.3");
+            sb.AppendLine($"PID|1||{results[0].SampleId}|{results[0].PatientName}");
+
+            int index = 1;
+            foreach (var result in results)
+            {
+                sb.AppendLine($"OBX|{index}|NM|{result.TestCode}^{result.TestName}||{result.Value}|{result.Units}|||{result.Flag}");
+                index++;
+            }
+
+            return sb.ToString();
         }
-
-        return sb.ToString();
     }
-}
 
+}
