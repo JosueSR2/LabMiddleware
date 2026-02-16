@@ -1,11 +1,8 @@
-using Middleware.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
-namespace Middleware.Core.Builders
-{
-    public static class Hl7Builder
+using Middleware_Core.Models;
+ public static class Hl7Builder
     {
         public static string Build(List<LabResult> results)
         {

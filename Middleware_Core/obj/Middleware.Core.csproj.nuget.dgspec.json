@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj": {}
+    "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware.Core.csproj": {}
   },
   "projects": {
-    "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj": {
+    "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj",
+        "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware.Core.csproj",
         "projectName": "Middleware.Core",
-        "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/Middleware.Core.csproj",
+        "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware.Core.csproj",
         "packagesPath": "/home/linkdicom/.nuget/packages/",
-        "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.Core/obj/",
+        "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/linkdicom/.nuget/NuGet/NuGet.Config"
@@ -38,6 +38,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
             "System.IO.Ports": {
               "target": "Package",
               "version": "[8.0.0, )"
@@ -59,7 +63,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.123/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.124/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

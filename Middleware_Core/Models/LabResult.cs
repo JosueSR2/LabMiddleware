@@ -8,8 +8,12 @@ namespace Middleware.Core.Models
         public string TestName { get; set; }
         public string Value { get; set; }
         public string Units { get; set; }
-        public string Flag { get; set; }  // F = Final, C = Corrected, P = Preliminary
-        public DateTime Timestamp { get; set; }
+        public string Flag { get; set; } 
+        public string AnalyzerId { get; set; }
+        public string RawMessage { get; set; }
+        public string Status { get; set; } = "Pending";
+        public int RetryCount { get; set; } = 0;
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string SourceMachine { get; set; }
     }
 }
