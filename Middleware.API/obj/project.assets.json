@@ -2030,11 +2030,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
+      "projectUniqueName": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware.API/Middleware.API.csproj",
       "projectName": "Middleware.Core",
-      "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
+      "projectPath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware.API/Middleware.API.csproj",
       "packagesPath": "/home/linkdicom/.nuget/packages/",
-      "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/obj/",
+      "outputPath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/linkdicom/.nuget/NuGet/NuGet.Config"
@@ -2049,8 +2049,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj": {
-              "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj"
+            "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/Middleware_Core.csproj": {
+              "projectPath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/Middleware_Core.csproj"
             }
           }
         }
