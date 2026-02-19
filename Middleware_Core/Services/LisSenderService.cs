@@ -17,6 +17,7 @@ namespace Middleware_Core.Services
         }
 
         public async Task SendAsync(LabResult result, string lisUrl)
+        public async Task<bool> SendAsync(LabResult result, string lisUrl)
         {
             try
             {
@@ -33,18 +34,26 @@ namespace Middleware_Core.Services
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"✔ Enviado correctamente: {result.SampleId}");
+                    return true;
                 }
                 else
                 {
                     Console.WriteLine($"❌ Error enviando a LIS: {response.StatusCode}");
                 }
+
+                Console.WriteLine($"❌ Error enviando a LIS: {response.StatusCode}");
+                return false;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[LisSenderService ERROR] {ex.Message}");
+                return false;
             }
         }
     }
 }
+ 
+ 
+
 
 
