@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Middleware_Core.Configuration;
 using Middleware_Core.Models;
@@ -10,12 +11,14 @@ namespace Middleware_Core.Services
         private readonly IOutboxRepository _outboxRepository;
         private readonly LisSenderService _lisSender;
         private readonly MiddlewareOptions _options;
+        private readonly OperationalMetrics _metrics;
 
-        public OutboxDeliveryService(IOutboxRepository outboxRepository, LisSenderService lisSender, MiddlewareOptions options)
+        public OutboxDeliveryService(IOutboxRepository outboxRepository, LisSenderService lisSender, MiddlewareOptions options, OperationalMetrics metrics)
         {
             _outboxRepository = outboxRepository;
             _lisSender = lisSender;
             _options = options;
+            _metrics = metrics;
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
@@ -26,12 +29,17 @@ namespace Middleware_Core.Services
 
                 foreach (var record in records)
                 {
+                    var sw = Stopwatch.StartNew();
+                    var correlationId = Guid.NewGuid().ToString("N");
+
                     try
                     {
                         var payload = JsonSerializer.Deserialize<LabResult>(record.PayloadJson);
                         if (payload == null)
                         {
                             await _outboxRepository.MarkFailedAsync(record.Id, "Invalid payload JSON", cancellationToken);
+                            _metrics.IncrementFailedPermanent();
+                            StructuredLog.Error("delivery.invalid_payload", new { correlationId, messageId = record.Id });
                             continue;
                         }
 
@@ -39,14 +47,23 @@ namespace Middleware_Core.Services
                         if (sent)
                         {
                             await _outboxRepository.MarkSentAsync(record.Id, cancellationToken);
+                            _metrics.IncrementLisSuccess();
+                            StructuredLog.Info("delivery.sent", new { correlationId, messageId = record.Id, sampleId = payload.SampleId });
                             continue;
                         }
 
+                        _metrics.IncrementLisFailure();
                         await ScheduleRetryAsync(record, "LIS returned non-success status", cancellationToken);
                     }
                     catch (Exception ex)
                     {
+                        _metrics.IncrementLisFailure();
                         await ScheduleRetryAsync(record, ex.Message, cancellationToken);
+                    }
+                    finally
+                    {
+                        sw.Stop();
+                        _metrics.AddDeliveryLatency(sw.ElapsedMilliseconds);
                     }
                 }
 
@@ -60,12 +77,16 @@ namespace Middleware_Core.Services
             if (nextRetryCount > _options.RetryScheduleSeconds.Count)
             {
                 await _outboxRepository.MarkFailedAsync(record.Id, error, cancellationToken);
+                _metrics.IncrementFailedPermanent();
+                StructuredLog.Error("delivery.failed_permanent", new { messageId = record.Id, error });
                 return;
             }
 
             var waitSeconds = _options.RetryScheduleSeconds[nextRetryCount - 1];
             var nextAttempt = DateTime.UtcNow.AddSeconds(waitSeconds);
             await _outboxRepository.MarkRetryAsync(record.Id, nextRetryCount, nextAttempt, error, cancellationToken);
+            _metrics.IncrementRetryScheduled();
+            StructuredLog.Info("delivery.retry_scheduled", new { messageId = record.Id, nextRetryCount, waitSeconds, error });
         }
     }
 }

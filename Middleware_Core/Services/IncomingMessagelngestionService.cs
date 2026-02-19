@@ -9,33 +9,38 @@ namespace Middleware_Core.Services
     {
         private readonly IncomingMessageQueue _queue;
         private readonly IOutboxRepository _outboxRepository;
+        private readonly OperationalMetrics _metrics;
 
-        public IncomingMessageIngestionService(IncomingMessageQueue queue, IOutboxRepository outboxRepository)
+        public IncomingMessageIngestionService(IncomingMessageQueue queue, IOutboxRepository outboxRepository, OperationalMetrics metrics)
         {
             _queue = queue;
             _outboxRepository = outboxRepository;
+            _metrics = metrics;
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
         {
             await foreach (var message in _queue.ReadAllAsync(cancellationToken))
             {
+                var messageId = Guid.NewGuid().ToString("N");
+                _metrics.IncrementIngress();
+
                 try
                 {
+                    StructuredLog.Info("ingestion.received", new { messageId, analyzerId = message.ExternalId, source = message.Source });
                     var parser = ParserFactory.GetParser(string.Empty, message.RawMessage);
                     var results = parser.Parse(message.RawMessage);
 
                     foreach (var result in results)
                     {
-                        if (string.IsNullOrWhiteSpace(result.SourceMachine))
-                            result.SourceMachine = message.Source;
+                        var canonical = LabResultCanonicalNormalizer.Normalize(result, message.Source);
+                        var fingerprint = MessageFingerprintService.Build(canonical);
+                        var payloadJson = JsonSerializer.Serialize(canonical);
 
-                        var fingerprint = MessageFingerprintService.Build(result);
-                        var payloadJson = JsonSerializer.Serialize(result);
                         var added = await _outboxRepository.TryAddAsync(new OutboxRecord
                         {
                             Fingerprint = fingerprint,
-                            Payload = result,
+                            Payload = canonical,
                             PayloadJson = payloadJson,
                             Status = "Pending",
                             RetryCount = 0,
@@ -44,15 +49,21 @@ namespace Middleware_Core.Services
                             UpdatedUtc = DateTime.UtcNow
                         }, cancellationToken);
 
-                        if (!added)
+                        if (added)
                         {
-                            Console.WriteLine($"[OUTBOX] Duplicate ignored (fingerprint={fingerprint})");
+                            _metrics.IncrementOutboxInserted();
+                            StructuredLog.Info("outbox.inserted", new { messageId, analyzerId = message.ExternalId, fingerprint });
+                        }
+                        else
+                        {
+                            _metrics.IncrementOutboxDuplicate();
+                            StructuredLog.Info("outbox.duplicate", new { messageId, analyzerId = message.ExternalId, fingerprint });
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[INGESTION ERROR] {ex.Message}");
+                    StructuredLog.Error("ingestion.error", new { messageId, analyzerId = message.ExternalId, error = ex.Message });
                 }
             }
         }

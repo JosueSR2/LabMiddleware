@@ -1,6 +1,4 @@
 using Middleware_Core.Models;
-using System;
-using System.Collections.Generic;
 
 namespace Middleware_Core.Parsers
 {
@@ -12,10 +10,6 @@ namespace Middleware_Core.Parsers
 
             if (string.IsNullOrWhiteSpace(rawMessage))
                 return results;
-
-            var lines = rawMessage.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            string sampleId = "";
-            string patientName = "";
             var lines = rawMessage.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
             string sampleId = string.Empty;
             string patientName = string.Empty;
@@ -23,22 +17,14 @@ namespace Middleware_Core.Parsers
             foreach (var line in lines)
             {
                 var fields = line.Split('|');
-                if (fields.Length == 0) continue;
                 if (fields.Length == 0)
                     continue;
-
-                // PID segment: Sample/Patient info
                 if (fields[0] == "PID")
                 {
-                    sampleId = fields.Length > 3 ? fields[3] : "";
-                    patientName = fields.Length > 5 ? fields[5] : "";
                     sampleId = SafeField(fields, 3);
                     patientName = SafeField(fields, 5);
                     continue;
                 }
-
-                // OBX segment: Lab result
-                if (fields[0] == "OBX")
                 if (fields[0] != "OBX")
                     continue;
 
@@ -49,19 +35,6 @@ namespace Middleware_Core.Parsers
 
                 results.Add(new LabResult
                 {
-                    results.Add(new LabResult
-                    {
-                        SampleId = sampleId,
-                        PatientName = patientName,
-                        TestCode = fields.Length > 3 ? fields[3].Split('^')[0] : "",
-                        TestName = fields.Length > 3 ? fields[3].Split('^')[1] : "",
-                        Value = fields.Length > 5 ? fields[5] : "",
-                        Units = fields.Length > 6 ? fields[6] : "",
-                        Flag = fields.Length > 8 ? fields[8] : "F",
-                        Timestamp = DateTime.Now,
-                        SourceMachine = "HL7"
-                    });
-                }
                     SampleId = sampleId,
                     PatientName = patientName,
                     TestCode = testCode,

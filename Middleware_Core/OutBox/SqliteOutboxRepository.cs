@@ -1,5 +1,3 @@
-using Microsoft.Data.Sqlite;
-
 namespace Middleware_Core.Outbox
 {
     public class SqliteOutboxRepository : IOutboxRepository
@@ -71,41 +69,62 @@ VALUES ($id, $fingerprint, $payload, $status, $retry, $nextAttempt, $lastError, 
             }
         }
 
-        public async Task<List<OutboxRecord>> GetDuePendingAsync(int limit, DateTime nowUtc, CancellationToken cancellationToken = default)
+        public Task<List<OutboxRecord>> GetDuePendingAsync(int limit, DateTime nowUtc, CancellationToken cancellationToken = default)
+            => QueryAsync("WHERE Status = 'Pending' AND NextAttemptUtc <= $p1", "$p1", nowUtc.ToString("O"), limit, cancellationToken);
+
+        public Task<List<OutboxRecord>> GetByStatusAsync(string status, int limit, CancellationToken cancellationToken = default)
+            => QueryAsync("WHERE Status = $p1", "$p1", status, limit, cancellationToken);
+
+        public async Task<Dictionary<string, int>> GetStatusCountsAsync(CancellationToken cancellationToken = default)
+        {
+            await using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync(cancellationToken);
+
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Status, COUNT(*) FROM Outbox GROUP BY Status;";
+
+            var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+                result[reader.GetString(0)] = reader.GetInt32(1);
+
+            return result;
+        }
+
+        public async Task<int> RequeueAsync(string id, CancellationToken cancellationToken = default)
         {
             await using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync(cancellationToken);
 
             var cmd = connection.CreateCommand();
             cmd.CommandText = @"
-SELECT Id, Fingerprint, PayloadJson, Status, RetryCount, NextAttemptUtc, LastError, CreatedUtc, UpdatedUtc
-FROM Outbox
-WHERE Status = 'Pending' AND NextAttemptUtc <= $nowUtc
-ORDER BY CreatedUtc
-LIMIT $limit;
+UPDATE Outbox
+SET Status = 'Pending', RetryCount = 0, NextAttemptUtc = $nextAttempt, LastError = NULL, UpdatedUtc = $updatedUtc
+WHERE Id = $id;
 ";
-            cmd.Parameters.AddWithValue("$nowUtc", nowUtc.ToString("O"));
-            cmd.Parameters.AddWithValue("$limit", limit);
+            cmd.Parameters.AddWithValue("$nextAttempt", DateTime.UtcNow.ToString("O"));
+            cmd.Parameters.AddWithValue("$updatedUtc", DateTime.UtcNow.ToString("O"));
+            cmd.Parameters.AddWithValue("$id", id);
+            return await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
 
-            var records = new List<OutboxRecord>();
-            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
-            while (await reader.ReadAsync(cancellationToken))
-            {
-                records.Add(new OutboxRecord
-                {
-                    Id = reader.GetString(0),
-                    Fingerprint = reader.GetString(1),
-                    PayloadJson = reader.GetString(2),
-                    Status = reader.GetString(3),
-                    RetryCount = reader.GetInt32(4),
-                    NextAttemptUtc = DateTime.Parse(reader.GetString(5)).ToUniversalTime(),
-                    LastError = reader.IsDBNull(6) ? null : reader.GetString(6),
-                    CreatedUtc = DateTime.Parse(reader.GetString(7)).ToUniversalTime(),
-                    UpdatedUtc = DateTime.Parse(reader.GetString(8)).ToUniversalTime()
-                });
-            }
+        public async Task<int> RequeueRangeAsync(DateTime fromUtc, DateTime toUtc, bool includeSent, CancellationToken cancellationToken = default)
+        {
+            await using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync(cancellationToken);
 
-            return records;
+            var cmd = connection.CreateCommand();
+            var filter = includeSent ? "Status IN ('Failed','Sent')" : "Status = 'Failed'";
+            cmd.CommandText = $@"
+UPDATE Outbox
+SET Status = 'Pending', RetryCount = 0, NextAttemptUtc = $nextAttempt, LastError = NULL, UpdatedUtc = $updatedUtc
+WHERE CreatedUtc >= $fromUtc AND CreatedUtc <= $toUtc AND {filter};
+";
+            cmd.Parameters.AddWithValue("$nextAttempt", DateTime.UtcNow.ToString("O"));
+            cmd.Parameters.AddWithValue("$updatedUtc", DateTime.UtcNow.ToString("O"));
+            cmd.Parameters.AddWithValue("$fromUtc", fromUtc.ToString("O"));
+            cmd.Parameters.AddWithValue("$toUtc", toUtc.ToString("O"));
+            return await cmd.ExecuteNonQueryAsync(cancellationToken);
         }
 
         public Task MarkSentAsync(string id, CancellationToken cancellationToken = default)
@@ -116,6 +135,46 @@ LIMIT $limit;
 
         public Task MarkFailedAsync(string id, string? error, CancellationToken cancellationToken = default)
             => UpdateStatusAsync(id, "Failed", null, null, error, cancellationToken);
+
+        private async Task<List<OutboxRecord>> QueryAsync(string whereClause, string p1Name, object p1Value, int limit, CancellationToken cancellationToken)
+        {
+            await using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync(cancellationToken);
+
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = $@"
+SELECT Id, Fingerprint, PayloadJson, Status, RetryCount, NextAttemptUtc, LastError, CreatedUtc, UpdatedUtc
+FROM Outbox
+{whereClause}
+ORDER BY CreatedUtc
+LIMIT $limit;
+";
+            cmd.Parameters.AddWithValue(p1Name, p1Value);
+            cmd.Parameters.AddWithValue("$limit", limit);
+
+            var records = new List<OutboxRecord>();
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+                records.Add(ReadRecord(reader));
+
+            return records;
+        }
+
+        private static OutboxRecord ReadRecord(SqliteDataReader reader)
+        {
+            return new OutboxRecord
+            {
+                Id = reader.GetString(0),
+                Fingerprint = reader.GetString(1),
+                PayloadJson = reader.GetString(2),
+                Status = reader.GetString(3),
+                RetryCount = reader.GetInt32(4),
+                NextAttemptUtc = DateTime.Parse(reader.GetString(5)).ToUniversalTime(),
+                LastError = reader.IsDBNull(6) ? null : reader.GetString(6),
+                CreatedUtc = DateTime.Parse(reader.GetString(7)).ToUniversalTime(),
+                UpdatedUtc = DateTime.Parse(reader.GetString(8)).ToUniversalTime()
+            };
+        }
 
         private async Task UpdateStatusAsync(string id, string status, int? retryCount, DateTime? nextAttemptUtc, string? error, CancellationToken cancellationToken)
         {

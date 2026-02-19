@@ -13,3 +13,4 @@ namespace Middleware_Core.Queue
             => _channel.Reader.ReadAllAsync(cancellationToken);
     }
 }
+
