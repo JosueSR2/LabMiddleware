@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "J8MKEACMig9/diAZUDXpnWH44EopENhLXRpA1MYK0wnendJnWtNjQf+wher66gxJBq1xwyt88cNz4NX9De2hdw==",
+  "dgSpecHash": "kK1Ms5EIFOWMyesp/9adxZsTmVoWwLES8v+9mvnLa9hD7zialFjpRNIu3G7+T3KP+zqJQncnp157xFa4z1SqlA==",
   "success": true,
-  "projectFilePath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
+  "projectFilePath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
   "expectedPackageFiles": [
     "/home/linkdicom/.nuget/packages/microsoft.extensions.configuration/10.0.3/microsoft.extensions.configuration.10.0.3.nupkg.sha512",
     "/home/linkdicom/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.3/microsoft.extensions.configuration.abstractions.10.0.3.nupkg.sha512",

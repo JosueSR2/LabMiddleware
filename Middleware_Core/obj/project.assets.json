@@ -2012,11 +2012,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
+      "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
       "projectName": "Middleware_Core",
-      "projectPath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
+      "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/Middleware_Core.csproj",
       "packagesPath": "/home/linkdicom/.nuget/packages/",
-      "outputPath": "/home/linkdicom/Proyectos/OpenELIS-Global-2/LabMiddleware/Middleware_Core/obj/",
+      "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/linkdicom/.nuget/NuGet/NuGet.Config"
