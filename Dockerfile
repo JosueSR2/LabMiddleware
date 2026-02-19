@@ -1,19 +1,26 @@
-# BUILD
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copiar ambos proyectos
-COPY Middleware_Core/ Middleware_Core/
-COPY Middleware.API/ Middleware.API/
-
-# Restaurar dependencias
+# Copiar archivos de solución/proyectos primero para aprovechar cache de restore
+COPY LabMiddleware.sln ./
+COPY Middleware.API/Middleware.API.csproj Middleware.API/
+COPY Middleware_Core/Middleware_Core.csproj Middleware_Core/
 RUN dotnet restore Middleware.API/Middleware.API.csproj
 
-# Publicar la aplicación y todas sus dependencias
-RUN dotnet publish Middleware.API/Middleware.API.csproj -c Release -o /src/publish
+# Copiar el resto del código y publicar
+COPY Middleware.API/ Middleware.API/
+COPY Middleware_Core/ Middleware_Core/
+RUN dotnet publish Middleware.API/Middleware.API.csproj -c Release -o /app/publish --no-restore
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /src/publish/ .
-ENTRYPOINT ["dotnet", "Middleware.API.dll"]
+
+# Carpeta esperada por Program.cs para monitorear archivos
+RUN mkdir -p /home/linkdicom/Proyectos/LabMiddleware/TestingResources
+
+COPY --from=build /app/publish/ ./
+
+EXPOSE 8080
+EXPOSE 5001
+
+ENTRYPOINT ["dotnet", "Middleware.Core.dll"]

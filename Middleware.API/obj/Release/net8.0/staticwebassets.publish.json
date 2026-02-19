@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "RPcAVmWqItbIBAXHYbrYsU6ScJUgEVRhR+UiOhYNwuI=",
+  "Source": "Middleware.Core",
+  "BasePath": "_content/Middleware.Core",
+  "Mode": "Default",
+  "ManifestType": "Publish",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

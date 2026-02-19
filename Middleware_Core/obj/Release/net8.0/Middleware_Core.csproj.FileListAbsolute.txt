@@ -1,0 +1,13 @@
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/bin/Release/net8.0/Middleware_Core.deps.json
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/bin/Release/net8.0/Middleware_Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/bin/Release/net8.0/Middleware_Core.pdb
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.csproj.AssemblyReference.cache
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.AssemblyInfoInputs.cache
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.AssemblyInfo.cs
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.csproj.CoreCompileInputs.cache
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.sourcelink.json
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/refint/Middleware_Core.dll
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/Middleware_Core.pdb
+/home/linkdicom/Proyectos/LabMiddleware/Middleware_Core/obj/Release/net8.0/ref/Middleware_Core.dll
