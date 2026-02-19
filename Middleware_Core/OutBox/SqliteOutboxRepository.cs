@@ -1,3 +1,5 @@
+using Microsoft.Data.Sqlite;
+
 namespace Middleware_Core.Outbox
 {
     public class SqliteOutboxRepository : IOutboxRepository

@@ -1,8 +1,8 @@
 using Middleware_Core.Configuration;
 using Middleware_Core.Outbox;
-using Middleware_Core.Services;
 using Middleware_Core.Protocols;
-using Middleware_Core.Queues;
+using Middleware_Core.Queue;
+using Middleware_Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +33,6 @@ var fileMonitors = new List<FileMonitoring>();
 
 void Enqueue(string raw, AnalyzerProfile profile)
 {
-
     queue.EnqueueAsync(new IncomingMessage(profile.SourceMachine, raw, profile.Name, DateTime.UtcNow)).AsTask().GetAwaiter().GetResult();
 }
 

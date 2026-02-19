@@ -2344,7 +2344,7 @@
     "version": "1.0.0",
     "restore": {
       "projectUniqueName": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
-      "projectName": "Middleware.Core",
+      "projectName": "Middleware.API",
       "projectPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/Middleware.API.csproj",
       "packagesPath": "/home/linkdicom/.nuget/packages/",
       "outputPath": "/home/linkdicom/Proyectos/LabMiddleware/Middleware.API/obj/",

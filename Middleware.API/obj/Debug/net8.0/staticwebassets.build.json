@@ -1,8 +1,8 @@
 {
   "Version": 1,
-  "Hash": "Y6LnsNFj3HbsVwJNKRs4E2okFtvKXqMrGEw5CfafSfY=",
-  "Source": "Middleware.Core",
-  "BasePath": "_content/Middleware.Core",
+  "Hash": "Wv7jMdF8kNsQKaPCZPA23C/bI8lzknxjHX/tnFa3yko=",
+  "Source": "Middleware.API",
+  "BasePath": "_content/Middleware.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],

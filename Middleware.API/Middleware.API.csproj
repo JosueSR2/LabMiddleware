@@ -1,18 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">  <!-- SDK Web obligatorio -->
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>    <!-- tu SDK ya está instalado -->
+  <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Middleware.Core</RootNamespace>
-    <AssemblyName>Middleware.Core</AssemblyName>
-  </PropertyGroup>    <!-- clave: debe ser ejecutable -->
+    <RootNamespace>Middleware.API</RootNamespace>
+    <AssemblyName>Middleware.API</AssemblyName>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Middleware_Core\Middleware_Core.csproj" />
   </ItemGroup>
 
-
 </Project>
-

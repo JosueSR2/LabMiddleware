@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("Middleware.Core")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Middleware.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+abfe25c2a9b17f3791c3554658c4b2af24c60036")]
-[assembly: System.Reflection.AssemblyProductAttribute("Middleware.Core")]
-[assembly: System.Reflection.AssemblyTitleAttribute("Middleware.Core")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d154823a8c5c26c85bc69c8d8b4d2baae19973ee")]
+[assembly: System.Reflection.AssemblyProductAttribute("Middleware.API")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Middleware.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generado por la clase WriteCodeFragment de MSBuild.

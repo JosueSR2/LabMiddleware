@@ -67,3 +67,4 @@ namespace Middleware_Core.Configuration
         public int BaudRate { get; set; } = 9600;
     }
 }
+
