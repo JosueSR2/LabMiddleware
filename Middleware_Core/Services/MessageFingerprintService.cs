@@ -22,6 +22,19 @@ namespace Middleware_Core.Services
             var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(raw));
             return Convert.ToHexString(hash);
         }
+
+        public static string BuildRawMessage(string sourceMachine, string? externalId, string rawMessage)
+        {
+            var raw = string.Join("|", new[]
+            {
+                sourceMachine ?? string.Empty,
+                externalId ?? string.Empty,
+                rawMessage ?? string.Empty
+            });
+
+            using var sha = SHA256.Create();
+            var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(raw));
+            return Convert.ToHexString(hash);
+        }
     }
 }
-

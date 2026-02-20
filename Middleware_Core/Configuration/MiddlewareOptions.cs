@@ -12,12 +12,16 @@ namespace Middleware_Core.Configuration
         public List<AnalyzerProfile> Analyzers { get; set; } = new();
         public LisSecurityOptions LisSecurity { get; set; } = new();
         public ResilienceOptions Resilience { get; set; } = new();
+        public LisDeliveryOptions LisDelivery { get; set; } = new();
     }
 
     public class LisSecurityOptions
     {
         public bool RequireTls { get; set; }
         public string BearerToken { get; set; } = string.Empty;
+        public string BasicUsername { get; set; } = string.Empty;
+        public string BasicPassword { get; set; } = string.Empty;
+        public bool AllowInvalidServerCertificate { get; set; }
     }
 
     public class ResilienceOptions
@@ -25,6 +29,20 @@ namespace Middleware_Core.Configuration
         public int HttpTimeoutSeconds { get; set; } = 10;
         public int CircuitBreakerFailureThreshold { get; set; } = 5;
         public int CircuitBreakerBreakSeconds { get; set; } = 30;
+    }
+
+    public class LisDeliveryOptions
+    {
+        public LisPayloadMode PayloadMode { get; set; } = LisPayloadMode.RawMessage;
+        public string ContentType { get; set; } = "text/plain";
+        public bool SendOneRecordPerIncomingMessage { get; set; } = true;
+    }
+
+    public enum LisPayloadMode
+    {
+        RawMessage,
+        Hl7FromResult,
+        JsonLabResult
     }
 
     public enum TransportType
@@ -67,4 +85,3 @@ namespace Middleware_Core.Configuration
         public int BaudRate { get; set; } = 9600;
     }
 }
-

@@ -10,7 +10,19 @@ var options = new MiddlewareOptions();
 builder.Configuration.GetSection("Middleware").Bind(options);
 
 builder.Services.AddSingleton(options);
-builder.Services.AddHttpClient<LisSenderService>();
+builder.Services
+    .AddHttpClient<LisSenderService>()
+    .ConfigurePrimaryHttpMessageHandler(() =>
+    {
+        if (!options.LisSecurity.AllowInvalidServerCertificate)
+            return new HttpClientHandler();
+
+        StructuredLog.Info("lis.security.allow_invalid_certificate", new { enabled = true });
+        return new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+    });
 builder.Services.AddSingleton<IncomingMessageQueue>();
 builder.Services.AddSingleton<IOutboxRepository>(_ => new SqliteOutboxRepository(options.OutboxDbPath));
 builder.Services.AddSingleton<OperationalMetrics>();

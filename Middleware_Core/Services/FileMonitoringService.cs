@@ -10,8 +10,6 @@ namespace Middleware_Core.Services
     public class FileMonitoring
     {
         private readonly string _watchFolder;
-        private readonly LisSenderService _lisSender;
-        private readonly string _lisUrl;
         private readonly string _source;
         private readonly IncomingMessageQueue _queue;
         private FileSystemWatcher? _watcher;
@@ -53,8 +51,6 @@ namespace Middleware_Core.Services
             try
             {
                 await Task.Delay(500); // Esperar que el archivo termine de escribirse
-
-                await Task.Delay(500);
                 var rawMessage = await File.ReadAllTextAsync(e.FullPath);
                 await _queue.EnqueueAsync(new IncomingMessage(_source, rawMessage, e.Name, DateTime.UtcNow));
                 Console.WriteLine($"[FILE] Enqueued message from {e.Name}");

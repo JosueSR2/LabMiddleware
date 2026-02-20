@@ -43,8 +43,8 @@ namespace Middleware_Core.Services
                             continue;
                         }
 
-                        var sent = await _lisSender.SendAsync(payload, _options.LisUrl);
-                        if (sent)
+                        var sendResult = await _lisSender.SendAsync(payload, _options.LisUrl, cancellationToken);
+                        if (sendResult.Success)
                         {
                             await _outboxRepository.MarkSentAsync(record.Id, cancellationToken);
                             _metrics.IncrementLisSuccess();
@@ -53,7 +53,7 @@ namespace Middleware_Core.Services
                         }
 
                         _metrics.IncrementLisFailure();
-                        await ScheduleRetryAsync(record, "LIS returned non-success status", cancellationToken);
+                        await ScheduleRetryAsync(record, sendResult.Error ?? "LIS delivery failed", cancellationToken);
                     }
                     catch (Exception ex)
                     {
