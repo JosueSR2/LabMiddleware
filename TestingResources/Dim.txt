@@ -1,7 +1,0 @@
-PDIM111079
-21 Jul 2018 07:43:21 AM Sending Data to LIMS
-http://35.187.229.47:8080/arogya/faces/requests/mwapi.xhtml?machine=Dimension&username=buddhika&password=b&msg=2+80+28+68+73+77+49+28+49+28+49+28+48+28+55+57+3+
-success=true|toAnalyzer=2+78+28+54+65+3+
-Bytes written to Port = System.Byte[]
-21/Jul/18 7:43 Received <ACK> from Dimension. 
-21/Jul/18 7:43 Received a message from Dimension. <ACK> sent.
