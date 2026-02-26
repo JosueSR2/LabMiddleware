@@ -1,0 +1,129 @@
+LabMiddleware
+
+LabMiddleware es un middleware de integración para laboratorios clínicos diseñado para recibir, transformar y reenviar resultados de analizadores hacia sistemas LIS (Laboratory Information Systems) como OpenELIS.
+
+Permite la comunicación con equipos mediante:
+
+TCP/IP
+Serial / USB
+File Drop
+Protocolos HL7 (MLLP)
+ASTM
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+Características
+
+Soporte para múltiples analizadores simultáneos
+
+Recepción de mensajes HL7 MLLP
+
+Recepción de mensajes ASTM (con checksum)
+
+Configuración flexible mediante appsettings.json
+
+Integración con LIS vía REST API
+
+Soporte para TLS
+
+Logging configurable
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+Arquitectura
+
+Analizador → Middleware → LIS (OpenELIS)
+
+El middleware:
+
+Escucha en puertos configurados
+
+Detecta el protocolo (HL7 / ASTM)
+
+Parsea el mensaje
+
+Transforma los resultados
+
+Envía los datos al LIS
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+Configuración
+
+Ejemplo de configuración en appsettings.json:
+
+{
+  "Tcp": {
+    "Enabled": true,
+    "Port": 5001
+  },
+  "Analyzers": [
+    {
+      "Name": "hl7-mllp-default",
+      "TcpPort": 5001,
+      "Protocol": "Hl7Mllp"
+    },
+    {
+      "Name": "astm-tcp-default",
+      "TcpPort": 5002,
+      "Protocol": "Astm"
+    }
+  ]
+}
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+Protocolos soportados
+HL7 MLLP
+
+Envío delimitado por:
+
+<VT> inicio (0x0B)
+
+<FS><CR> fin (0x1C 0x0D)
+
+ASTM
+
+Comunicación con:
+
+STX / ETX
+
+Checksum
+
+ACK / NAK
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+Casos de uso
+
+Integración de analizadores hematológicos
+
+Integración de analizadores bioquímicos
+
+Simulación de laboratorio clínico
+
+Entornos de prueba para OpenELIS
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+Seguridad
+
+Soporte para TLS
+
+Autenticación básica
+
+Validación de certificados opcional
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+Autor
+
+Desarrollado por Josue Sierra
+Repositorio Oficial: https://github.com/JosueSR2
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
