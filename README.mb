@@ -13,11 +13,11 @@ The system provides protocol-level handling, message transformation, transport a
 
 This middleware is intended for:
 
-Clinical laboratories
+- Clinical laboratories
 
-Hospital environments
+- Hospital environments
 
-Diagnostic centers
+- Diagnostic centers
 
 LIS integration projects
 
@@ -184,38 +184,62 @@ Primary configuration file: appsettings.json
 Example:
 
 {
-"Middleware": {
-"LisUrl": "https://localhost:8443/api/OpenELIS-Global/analyzer/astm
-",
-"DeliveryBatchSize": 50,
-"RetryScheduleSeconds": [10, 30, 120, 300],
-"Tcp": {
-"Enabled": true,
-"Port": 5001
-},
-"Serial": {
-"Enabled": false,
-"PortName": "COM1",
-"BaudRate": 9600
-},
-"Analyzers": [
-{
-"Name": "hl7-mllp-default",
-"Transport": "Tcp",
-"Protocol": "Hl7Mllp",
-"TcpPort": 5001,
-"EncodingName": "utf-8"
-},
-{
-"Name": "astm-tcp-default",
-"Transport": "Tcp",
-"Protocol": "Astm",
-"TcpPort": 5002,
-"EncodingName": "ascii"
-}
-]
-}
-}
+  "Middleware": {
+    "LisUrl": "https://localhost:8443/api/OpenELIS-Global/analyzer/astm",
+
+    "WatchFolder": "./TestingResources",
+    "OutboxDbPath": "./data/outbox.db",
+    "DeliveryBatchSize": 50,
+    "RetryScheduleSeconds": [10, 30, 120, 300],
+
+    "LisSecurity": {
+      "RequireTls": true,
+      "BearerToken": "",
+      "BasicUsername": "admin",
+      "BasicPassword": "adminADMIN!",
+      "AllowInvalidServerCertificate": true
+    },
+
+    "LisDelivery": {
+      "PayloadMode": "RawMessage",
+      "ContentType": "text/plain",
+      "SendOneRecordPerIncomingMessage": true
+    },
+
+    "Resilience": {
+      "HttpTimeoutSeconds": 30,
+      "CircuitBreakerFailureThreshold": 5,
+      "CircuitBreakerBreakSeconds": 30
+    },
+
+    "Tcp": {
+      "Enabled": true,
+      "Port": 5001
+    },
+
+    "Serial": {
+      "Enabled": false,
+      "PortName": "COM1",
+      "BaudRate": 9600
+    },
+
+    "Analyzers": [
+      {
+        "Name": "hl7-mllp-default",
+        "SourceMachine": "Analyzer-HL7",
+        "Transport": "Tcp",
+        "Protocol": "Hl7Mllp",
+        "TcpPort": 5001,
+        "EncodingName": "utf-8"
+      },
+      {
+        "Name": "astm-tcp-default",
+        "SourceMachine": "Analyzer-ASTM",
+        "Transport": "Tcp",
+        "Protocol": "Astm",
+        "TcpPort": 5002,
+        "EncodingName": "ascii"
+      },
 
 Key Configuration Areas:
 
