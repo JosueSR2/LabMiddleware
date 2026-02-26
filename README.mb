@@ -1,123 +1,357 @@
-LabMiddleware
+LABMIDDLEWARE
+Enterprise Technical Documentation
 
-LabMiddleware es un middleware de integración para laboratorios clínicos diseñado para recibir, transformar y reenviar resultados de analizadores hacia sistemas LIS (Laboratory Information Systems) como OpenELIS.
+Version: 1.0
+Author: Josue Sierra
+Repository: https://github.com/JosueSR2
 
-Permite la comunicación con equipos mediante:
+OVERVIEW
 
-TCP/IP
-Serial / USB
-File Drop
-Protocolos HL7 (MLLP)
-ASTM
+LabMiddleware is an enterprise-grade laboratory integration middleware designed to interface clinical analyzers with Laboratory Information Systems (LIS) such as OpenELIS.
 
+The system provides protocol-level handling, message transformation, transport abstraction, and secure delivery mechanisms to ensure reliable laboratory data exchange.
 
+This middleware is intended for:
 
-Características
+Clinical laboratories
 
-Soporte para múltiples analizadores simultáneos
+Hospital environments
 
-Recepción de mensajes HL7 MLLP
+Diagnostic centers
 
-Recepción de mensajes ASTM (con checksum)
+LIS integration projects
 
-Configuración flexible mediante appsettings.json
+Analyzer simulation and validation environments
 
-Integración con LIS vía REST API
+SYSTEM ARCHITECTURE
 
-Soporte para TLS
+Logical Architecture:
 
-Logging configurable
+Analyzer Layer
+↓
+Transport Layer (TCP / Serial / File)
+↓
+Protocol Engine (HL7 MLLP / ASTM)
+↓
+Parsing & Transformation Engine
+↓
+Delivery Engine (REST API)
+↓
+Laboratory Information System (LIS)
 
+Core Components:
 
+Transport Listener
 
-Arquitectura
+TCP Listener
 
-Analizador → Middleware → LIS (OpenELIS)
+Serial Port Listener
 
-El middleware:
+File System Watcher
 
-Escucha en puertos configurados
+Protocol Processor
 
-Detecta el protocolo (HL7 / ASTM)
+HL7 MLLP framing handler
 
-Parsea el mensaje
+ASTM frame handler (STX/ETX + checksum)
 
-Transforma los resultados
+Message Parser
 
-Envía los datos al LIS
+Segment extraction
 
+Result mapping
 
+Validation layer
 
-Configuración
+Delivery Engine
 
-Ejemplo de configuración en appsettings.json:
+REST client
+
+Retry policy
+
+Batch delivery
+
+Circuit breaker support
+
+Logging & Monitoring
+
+Configurable verbosity
+
+Error tracking
+
+Delivery auditing
+
+SUPPORTED COMMUNICATION METHODS
+
+3.1 TCP/IP
+
+Used for:
+
+HL7 MLLP analyzers
+
+ASTM over TCP analyzers
+
+Configurable parameters:
+
+Port
+
+Encoding
+
+TLS support (optional)
+
+3.2 Serial / USB
+
+Used for:
+
+Legacy analyzers
+
+Direct serial communication devices
+
+Configurable parameters:
+
+PortName
+
+BaudRate
+
+Parity
+
+DataBits
+
+StopBits
+
+3.3 File Drop
+
+Used for:
+
+Offline analyzers
+
+Batch export systems
+
+Testing environments
+
+Monitors a configured directory and processes incoming files.
+
+SUPPORTED PROTOCOLS
+
+4.1 HL7 (MLLP)
+
+Message framing:
+
+Start Block: 0x0B (VT)
+End Block: 0x1C (FS) + 0x0D (CR)
+
+Supported message structure:
+
+MSH
+
+PID
+
+OBR
+
+OBX
+
+Features:
+
+UTF-8 support
+
+Automatic message boundary detection
+
+ACK generation support (if enabled)
+
+4.2 ASTM
+
+Frame structure:
+
+STX
+Frame number
+Data
+ETX
+Checksum
+CR LF
+
+Features:
+
+Checksum validation
+
+ACK / NAK handling
+
+Multi-frame message reconstruction
+
+CONFIGURATION
+
+Primary configuration file: appsettings.json
+
+Example:
 
 {
-  "Tcp": {
-    "Enabled": true,
-    "Port": 5001
-  },
-  "Analyzers": [
-    {
-      "Name": "hl7-mllp-default",
-      "TcpPort": 5001,
-      "Protocol": "Hl7Mllp"
-    },
-    {
-      "Name": "astm-tcp-default",
-      "TcpPort": 5002,
-      "Protocol": "Astm"
-    }
-  ]
+"Middleware": {
+"LisUrl": "https://localhost:8443/api/OpenELIS-Global/analyzer/astm
+",
+"DeliveryBatchSize": 50,
+"RetryScheduleSeconds": [10, 30, 120, 300],
+"Tcp": {
+"Enabled": true,
+"Port": 5001
+},
+"Serial": {
+"Enabled": false,
+"PortName": "COM1",
+"BaudRate": 9600
+},
+"Analyzers": [
+{
+"Name": "hl7-mllp-default",
+"Transport": "Tcp",
+"Protocol": "Hl7Mllp",
+"TcpPort": 5001,
+"EncodingName": "utf-8"
+},
+{
+"Name": "astm-tcp-default",
+"Transport": "Tcp",
+"Protocol": "Astm",
+"TcpPort": 5002,
+"EncodingName": "ascii"
+}
+]
+}
 }
 
+Key Configuration Areas:
 
+LIS endpoint configuration
 
-Protocolos soportados
-HL7 MLLP
+Transport activation
 
-Envío delimitado por:
+Analyzer-to-port mapping
 
-<VT> inicio (0x0B)
+Encoding definition
 
-<FS><CR> fin (0x1C 0x0D)
+Retry policies
 
-ASTM
+Security configuration
 
-Comunicación con:
+SECURITY
 
-STX / ETX
+Supported Security Features:
 
-Checksum
+HTTPS (TLS 1.2+)
 
-ACK / NAK
+Basic Authentication
 
+Bearer Token Authentication
 
+Optional certificate validation override
 
-Casos de uso
+Configurable HTTP timeouts
 
-Integración de analizadores hematológicos
+Circuit breaker protection
 
-Integración de analizadores bioquímicos
+Recommended production setup:
 
-Simulación de laboratorio clínico
+TLS enabled
 
-Entornos de prueba para OpenELIS
+Valid server certificate
 
+Authentication enabled
 
+Logging level set to INFO
 
-Seguridad
+Circuit breaker enabled
 
-Soporte para TLS
+DELIVERY AND RESILIENCE
 
-Autenticación básica
+The Delivery Engine includes:
 
-Validación de certificados opcional
+Configurable retry schedule
 
+Batched result submission
 
+Circuit breaker protection
 
+Timeout configuration
 
-Autor
+Outbox persistence (SQLite supported)
 
-Desarrollado por Josue Sierra
-Repositorio Oficial: https://github.com/JosueSR2
+Retry Strategy Example:
+10s → 30s → 120s → 300s
+
+LOGGING AND MONITORING
+
+Logging levels:
+
+ERROR
+
+WARN
+
+INFO
+
+DEBUG
+
+Logs include:
+
+Connection events
+
+Protocol parsing results
+
+Delivery attempts
+
+Retry triggers
+
+Failure diagnostics
+
+Docker log example:
+
+docker logs --tail 100 -f openelisglobal-middlewares
+
+DEPLOYMENT
+
+Supported Environments:
+
+Docker container
+
+Windows Service (if implemented)
+
+Linux service deployment
+
+On-premise server environments
+
+Recommended Deployment Architecture:
+
+Analyzer Network Segment
+↓
+Middleware Server
+↓
+Secure Channel (HTTPS)
+↓
+LIS Server
+
+USE CASES
+
+Hematology analyzer integration
+
+Biochemistry analyzer integration
+
+Multi-analyzer hospital environments
+
+Laboratory simulation platforms
+
+OpenELIS integration projects
+
+Analyzer validation and testing labs
+
+AUTHORSHIP
+
+Developed and maintained by:
+
+Josue Sierra
+
+Official Repository:
+https://github.com/JosueSR2
+
+## 📄 License
+
+This project is licensed under the GNU GPL v3 License.
+Copyright © 2026 Josué SR
+
+END OF DOCUMENT
