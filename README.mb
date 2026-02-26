@@ -1,381 +1,144 @@
 LABMIDDLEWARE
 Enterprise Technical Documentation
-
 Version: 1.0
 Author: Josue Sierra
 Repository: https://github.com/JosueSR2
 
-OVERVIEW
-
+1. OVERVIEW
 LabMiddleware is an enterprise-grade laboratory integration middleware designed to interface clinical analyzers with Laboratory Information Systems (LIS) such as OpenELIS.
 
 The system provides protocol-level handling, message transformation, transport abstraction, and secure delivery mechanisms to ensure reliable laboratory data exchange.
 
-This middleware is intended for:
-
+Intended for:
 - Clinical laboratories
-
 - Hospital environments
-
 - Diagnostic centers
-
-LIS integration projects
-
-Analyzer simulation and validation environments
-
-SYSTEM ARCHITECTURE
-
+- LIS integration projects
+- Analyzer simulation and validation environments
+2. SYSTEM ARCHITECTURE
 Logical Architecture:
 
 Analyzer Layer
-↓
+      ↓
 Transport Layer (TCP / Serial / File)
-↓
+      ↓
 Protocol Engine (HL7 MLLP / ASTM)
-↓
+      ↓
 Parsing & Transformation Engine
-↓
+      ↓
 Delivery Engine (REST API)
-↓
+      ↓
 Laboratory Information System (LIS)
 
 Core Components:
+- Transport Listener (TCP, Serial, File Watcher)
+- Protocol Processor (HL7 MLLP, ASTM with checksum)
+- Message Parser (Segment extraction, result mapping, validation)
+- Delivery Engine (REST client, retry policy, batching, circuit breaker)
+- Logging & Monitoring (verbosity control, auditing, diagnostics)
+3. SUPPORTED COMMUNICATION METHODS
+TCP/IP
+- HL7 MLLP analyzers
+- ASTM over TCP analyzers
+Configurable: Port, Encoding, TLS
 
-Transport Listener
+Serial / USB
+- Legacy analyzers
+Configurable: PortName, BaudRate, Parity, DataBits, StopBits
 
-TCP Listener
-
-Serial Port Listener
-
-File System Watcher
-
-Protocol Processor
-
-HL7 MLLP framing handler
-
-ASTM frame handler (STX/ETX + checksum)
-
-Message Parser
-
-Segment extraction
-
-Result mapping
-
-Validation layer
-
-Delivery Engine
-
-REST client
-
-Retry policy
-
-Batch delivery
-
-Circuit breaker support
-
-Logging & Monitoring
-
-Configurable verbosity
-
-Error tracking
-
-Delivery auditing
-
-SUPPORTED COMMUNICATION METHODS
-
-3.1 TCP/IP
-
-Used for:
-
-HL7 MLLP analyzers
-
-ASTM over TCP analyzers
-
-Configurable parameters:
-
-Port
-
-Encoding
-
-TLS support (optional)
-
-3.2 Serial / USB
-
-Used for:
-
-Legacy analyzers
-
-Direct serial communication devices
-
-Configurable parameters:
-
-PortName
-
-BaudRate
-
-Parity
-
-DataBits
-
-StopBits
-
-3.3 File Drop
-
-Used for:
-
-Offline analyzers
-
-Batch export systems
-
-Testing environments
-
-Monitors a configured directory and processes incoming files.
-
-SUPPORTED PROTOCOLS
-
-4.1 HL7 (MLLP)
-
-Message framing:
-
+File Drop
+- Offline analyzers
+- Batch export systems
+Monitored directory processing
+4. SUPPORTED PROTOCOLS
+HL7 (MLLP)
 Start Block: 0x0B (VT)
 End Block: 0x1C (FS) + 0x0D (CR)
+Supported segments: MSH, PID, OBR, OBX
+Features: UTF-8 support, boundary detection, optional ACK generation
 
-Supported message structure:
-
-MSH
-
-PID
-
-OBR
-
-OBX
-
-Features:
-
-UTF-8 support
-
-Automatic message boundary detection
-
-ACK generation support (if enabled)
-
-4.2 ASTM
-
+ASTM
 Frame structure:
-
-STX
-Frame number
-Data
-ETX
-Checksum
-CR LF
-
-Features:
-
-Checksum validation
-
-ACK / NAK handling
-
-Multi-frame message reconstruction
-
-CONFIGURATION
-
+STX | Frame Number | Data | ETX | Checksum | CR LF
+Features: Checksum validation, ACK/NAK handling, multi-frame reconstruction
+5. CONFIGURATION
 Primary configuration file: appsettings.json
 
-Example:
-
-{
-  "Middleware": {
-    "LisUrl": "https://localhost:8443/api/OpenELIS-Global/analyzer/astm",
-
-    "WatchFolder": "./TestingResources",
-    "OutboxDbPath": "./data/outbox.db",
-    "DeliveryBatchSize": 50,
-    "RetryScheduleSeconds": [10, 30, 120, 300],
-
-    "LisSecurity": {
-      "RequireTls": true,
-      "BearerToken": "",
-      "BasicUsername": "admin",
-      "BasicPassword": "adminADMIN!",
-      "AllowInvalidServerCertificate": true
-    },
-
-    "LisDelivery": {
-      "PayloadMode": "RawMessage",
-      "ContentType": "text/plain",
-      "SendOneRecordPerIncomingMessage": true
-    },
-
-    "Resilience": {
-      "HttpTimeoutSeconds": 30,
-      "CircuitBreakerFailureThreshold": 5,
-      "CircuitBreakerBreakSeconds": 30
-    },
-
-    "Tcp": {
-      "Enabled": true,
-      "Port": 5001
-    },
-
-    "Serial": {
-      "Enabled": false,
-      "PortName": "COM1",
-      "BaudRate": 9600
-    },
-
-    "Analyzers": [
-      {
-        "Name": "hl7-mllp-default",
-        "SourceMachine": "Analyzer-HL7",
-        "Transport": "Tcp",
-        "Protocol": "Hl7Mllp",
-        "TcpPort": 5001,
-        "EncodingName": "utf-8"
-      },
-      {
-        "Name": "astm-tcp-default",
-        "SourceMachine": "Analyzer-ASTM",
-        "Transport": "Tcp",
-        "Protocol": "Astm",
-        "TcpPort": 5002,
-        "EncodingName": "ascii"
-      },
-
 Key Configuration Areas:
+- LIS endpoint configuration
+- Transport activation
+- Analyzer-to-port mapping
+- Encoding definition
+- Retry policies
+- Security configuration
+6. SECURITY
+Supported Features:
+- HTTPS (TLS 1.2+)
+- Basic Authentication
+- Bearer Token Authentication
+- Optional certificate validation override
+- Configurable HTTP timeouts
+- Circuit breaker protection
 
-LIS endpoint configuration
-
-Transport activation
-
-Analyzer-to-port mapping
-
-Encoding definition
-
-Retry policies
-
-Security configuration
-
-SECURITY
-
-Supported Security Features:
-
-HTTPS (TLS 1.2+)
-
-Basic Authentication
-
-Bearer Token Authentication
-
-Optional certificate validation override
-
-Configurable HTTP timeouts
-
-Circuit breaker protection
-
-Recommended production setup:
-
-TLS enabled
-
-Valid server certificate
-
-Authentication enabled
-
-Logging level set to INFO
-
-Circuit breaker enabled
-
-DELIVERY AND RESILIENCE
-
-The Delivery Engine includes:
-
-Configurable retry schedule
-
-Batched result submission
-
-Circuit breaker protection
-
-Timeout configuration
-
-Outbox persistence (SQLite supported)
+Recommended Production Setup:
+- TLS enabled
+- Valid server certificate
+- Authentication enabled
+- Logging level set to INFO
+- Circuit breaker enabled
+7. DELIVERY AND RESILIENCE
+Delivery Engine Capabilities:
+- Configurable retry schedule
+- Batched result submission
+- Circuit breaker protection
+- Timeout configuration
+- Outbox persistence (SQLite)
 
 Retry Strategy Example:
 10s → 30s → 120s → 300s
+8. LOGGING AND MONITORING
+Logging Levels:
+- ERROR
+- WARN
+- INFO
+- DEBUG
 
-LOGGING AND MONITORING
-
-Logging levels:
-
-ERROR
-
-WARN
-
-INFO
-
-DEBUG
-
-Logs include:
-
-Connection events
-
-Protocol parsing results
-
-Delivery attempts
-
-Retry triggers
-
-Failure diagnostics
-
-Docker log example:
-
-docker logs --tail 100 -f openelisglobal-middlewares
-
-DEPLOYMENT
-
+Logs Include:
+- Connection events
+- Protocol parsing results
+- Delivery attempts
+- Retry triggers
+- Failure diagnostics
+9. DEPLOYMENT
 Supported Environments:
+- Docker container
+- Windows Service
+- Linux service deployment
+- On-premise environments
 
-Docker container
-
-Windows Service (if implemented)
-
-Linux service deployment
-
-On-premise server environments
-
-Recommended Deployment Architecture:
+Recommended Architecture:
 
 Analyzer Network Segment
-↓
+      ↓
 Middleware Server
-↓
+      ↓
 Secure Channel (HTTPS)
-↓
+      ↓
 LIS Server
-
-USE CASES
-
-Hematology analyzer integration
-
-Biochemistry analyzer integration
-
-Multi-analyzer hospital environments
-
-Laboratory simulation platforms
-
-OpenELIS integration projects
-
-Analyzer validation and testing labs
-
-AUTHORSHIP
-
+10. USE CASES
+- Hematology analyzer integration
+- Biochemistry analyzer integration
+- Multi-analyzer hospital environments
+- Laboratory simulation platforms
+- OpenELIS integration projects
+- Analyzer validation labs
+11. AUTHORSHIP & LICENSE
 Developed and maintained by:
-
 Josue Sierra
 
-Official Repository:
+Repository:
 https://github.com/JosueSR2
 
-## 📄 License
-
-This project is licensed under the GNU GPL v3 License.
+License:
+GNU General Public License v3.0
 Copyright © 2026 Josué SR
-
-END OF DOCUMENT
