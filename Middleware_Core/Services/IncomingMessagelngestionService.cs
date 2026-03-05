@@ -60,6 +60,7 @@ namespace Middleware_Core.Services
                     {
                         var envelope = normalizedResults.FirstOrDefault() ?? LabResultCanonicalNormalizer.Normalize(new LabResult(), message.Source);
                         envelope.RawMessage = message.RawMessage;
+                        envelope.SourceMachine = string.IsNullOrWhiteSpace(message.Source) ? envelope.SourceMachine : message.Source;
                         envelope.AnalyzerId = string.IsNullOrWhiteSpace(envelope.AnalyzerId)
                             ? message.ExternalId ?? string.Empty
                             : envelope.AnalyzerId;

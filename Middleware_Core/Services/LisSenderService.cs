@@ -106,10 +106,43 @@ namespace Middleware_Core.Services
                 LisPayloadMode.JsonLabResult => JsonSerializer.Serialize(result),
                 LisPayloadMode.Hl7FromResult => Hl7Builder.Build(new List<LabResult> { result }),
                 LisPayloadMode.RawMessage => !string.IsNullOrWhiteSpace(result.RawMessage)
-                    ? result.RawMessage
+                    ? ApplyHl7SendingApplication(result.RawMessage, result.SourceMachine)
                     : throw new InvalidOperationException("RawMessage is empty while LisDelivery.PayloadMode=RawMessage."),
                 _ => throw new InvalidOperationException($"Unsupported payload mode: {_options.LisDelivery.PayloadMode}")
             };
+        }
+
+        private static string ApplyHl7SendingApplication(string rawMessage, string? sourceMachine)
+        {
+            if (string.IsNullOrWhiteSpace(rawMessage) || string.IsNullOrWhiteSpace(sourceMachine))
+                return rawMessage;
+
+            var lineBreak = rawMessage.Contains("\r\n", StringComparison.Ordinal)
+                ? "\r\n"
+                : rawMessage.Contains('\r') ? "\r" : "\n";
+            var segments = rawMessage.Split(new[] { lineBreak }, StringSplitOptions.None);
+
+            for (var i = 0; i < segments.Length; i++)
+            {
+                var segment = segments[i];
+                if (string.IsNullOrWhiteSpace(segment))
+                    continue;
+
+                if (!segment.StartsWith("MSH|", StringComparison.Ordinal))
+                    break;
+
+                var fields = segment.Split('|');
+                if (fields.Length > 2)
+                {
+                    fields[2] = sourceMachine.Trim();
+                    segments[i] = string.Join("|", fields);
+                    return string.Join(lineBreak, segments);
+                }
+
+                break;
+            }
+
+            return rawMessage;
         }
 
         private static async Task<string> ReadBodySnippetAsync(HttpResponseMessage response, CancellationToken cancellationToken)
