@@ -3,6 +3,9 @@ using Middleware_Core.Outbox;
 using Middleware_Core.Protocols;
 using Middleware_Core.Queue;
 using Middleware_Core.Services;
+using System.Net.Security;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,18 +13,50 @@ var options = new MiddlewareOptions();
 builder.Configuration.GetSection("Middleware").Bind(options);
 
 builder.Services.AddSingleton(options);
+
+var contentRoot = builder.Environment.ContentRootPath;
+X509Certificate2Collection? lisTrustRoots = TryLoadTrustRoots(options, contentRoot);
+X509Certificate2? lisClientCertificate = TryLoadClientCertificate(options, contentRoot);
+
 builder.Services
     .AddHttpClient<LisSenderService>()
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        if (!options.LisSecurity.AllowInvalidServerCertificate)
-            return new HttpClientHandler();
-
-        StructuredLog.Info("lis.security.allow_invalid_certificate", new { enabled = true });
-        return new HttpClientHandler
+        var handler = new HttpClientHandler
         {
-            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
         };
+
+        if (lisClientCertificate != null)
+        {
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ClientCertificates.Add(lisClientCertificate);
+            StructuredLog.Info("lis.security.client_certificate.enabled",
+                new { subject = lisClientCertificate.Subject });
+        }
+
+        if (options.LisSecurity.AllowInvalidServerCertificate)
+        {
+            StructuredLog.Info("lis.security.allow_invalid_certificate", new { enabled = true });
+            handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            return handler;
+        }
+
+        if (lisTrustRoots != null && lisTrustRoots.Count > 0)
+        {
+            StructuredLog.Info("lis.security.custom_trust_roots.enabled", new { count = lisTrustRoots.Count });
+            handler.ServerCertificateCustomValidationCallback =
+                (req, cert, chain, errors) =>
+                    ValidateServerCertificateWithCustomRoots(
+                        req,
+                        cert,
+                        errors,
+                        lisTrustRoots,
+                        options.LisSecurity.AllowServerCertificateNameMismatch);
+        }
+
+        return handler;
     });
 builder.Services.AddSingleton<IncomingMessageQueue>();
 builder.Services.AddSingleton<IOutboxRepository>(_ => new SqliteOutboxRepository(options.OutboxDbPath));
@@ -45,7 +80,10 @@ var fileMonitors = new List<FileMonitoring>();
 
 void Enqueue(string raw, AnalyzerProfile profile)
 {
-    queue.EnqueueAsync(new IncomingMessage(profile.SourceMachine, raw, profile.Name, DateTime.UtcNow)).AsTask().GetAwaiter().GetResult();
+    var lisAnalyzerName = string.IsNullOrWhiteSpace(profile.LisAnalyzerName)
+        ? profile.Name
+        : profile.LisAnalyzerName;
+    queue.EnqueueAsync(new IncomingMessage(profile.SourceMachine, raw, lisAnalyzerName, DateTime.UtcNow)).AsTask().GetAwaiter().GetResult();
 }
 
 if (options.Analyzers.Count == 0)
@@ -130,3 +168,133 @@ app.MapPost("/ops/replay", async (DateTime fromUtc, DateTime toUtc, bool include
 });
 
 app.Run();
+
+static X509Certificate2Collection? TryLoadTrustRoots(MiddlewareOptions options, string contentRoot)
+{
+    var path = options.LisSecurity.TrustStorePath;
+    if (string.IsNullOrWhiteSpace(path))
+        return null;
+
+    var fullPath = ResolvePath(path, contentRoot);
+    if (!File.Exists(fullPath))
+    {
+        StructuredLog.Error("lis.security.truststore.missing", new { path = fullPath });
+        return null;
+    }
+
+    try
+    {
+        var collection = new X509Certificate2Collection();
+        collection.Import(fullPath, options.LisSecurity.TrustStorePassword, X509KeyStorageFlags.DefaultKeySet);
+
+        // Keep public certs only.
+        var roots = new X509Certificate2Collection();
+        foreach (var cert in collection)
+        {
+            try
+            {
+                roots.Add(new X509Certificate2(cert.Export(X509ContentType.Cert)));
+            }
+            catch
+            {
+                // Ignore malformed entries.
+            }
+        }
+
+        return roots.Count == 0 ? null : roots;
+    }
+    catch (Exception ex)
+    {
+        StructuredLog.Error("lis.security.truststore.load_failed", new { path = fullPath, error = ex.Message });
+        return null;
+    }
+}
+
+static X509Certificate2? TryLoadClientCertificate(MiddlewareOptions options, string contentRoot)
+{
+    var certPath = options.LisSecurity.ClientCertificatePath;
+    if (string.IsNullOrWhiteSpace(certPath))
+        return null;
+
+    var fullCertPath = ResolvePath(certPath, contentRoot);
+    if (!File.Exists(fullCertPath))
+    {
+        StructuredLog.Error("lis.security.client_certificate.missing", new { path = fullCertPath });
+        return null;
+    }
+
+    try
+    {
+        var ext = Path.GetExtension(fullCertPath);
+        if (ext.Equals(".p12", StringComparison.OrdinalIgnoreCase) ||
+            ext.Equals(".pfx", StringComparison.OrdinalIgnoreCase))
+        {
+            // If needed, add a password option later. For now, assume no password.
+            return new X509Certificate2(fullCertPath);
+        }
+
+        var keyPath = options.LisSecurity.ClientKeyPath;
+        X509Certificate2 pemCert;
+        if (!string.IsNullOrWhiteSpace(keyPath))
+        {
+            var fullKeyPath = ResolvePath(keyPath, contentRoot);
+            if (!File.Exists(fullKeyPath))
+            {
+                StructuredLog.Error("lis.security.client_key.missing", new { path = fullKeyPath });
+                return null;
+            }
+
+            pemCert = X509Certificate2.CreateFromPemFile(fullCertPath, fullKeyPath);
+        }
+        else
+        {
+            pemCert = X509Certificate2.CreateFromPemFile(fullCertPath);
+        }
+
+        // Rehydrate as PFX to avoid platform-specific issues with ephemeral keys.
+        return new X509Certificate2(pemCert.Export(X509ContentType.Pfx));
+    }
+    catch (Exception ex)
+    {
+        StructuredLog.Error("lis.security.client_certificate.load_failed", new { path = fullCertPath, error = ex.Message });
+        return null;
+    }
+}
+
+static bool ValidateServerCertificateWithCustomRoots(
+    HttpRequestMessage request,
+    X509Certificate2? certificate,
+    SslPolicyErrors errors,
+    X509Certificate2Collection trustRoots,
+    bool allowNameMismatch)
+{
+    if (certificate == null)
+        return false;
+
+    if ((errors & SslPolicyErrors.RemoteCertificateNotAvailable) != 0)
+        return false;
+
+    if (!allowNameMismatch &&
+        (errors & SslPolicyErrors.RemoteCertificateNameMismatch) != 0)
+        return false;
+
+    // If there are no chain errors, accept.
+    if ((errors & SslPolicyErrors.RemoteCertificateChainErrors) == 0)
+        return true;
+
+    using var chain = new X509Chain();
+    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+    foreach (var root in trustRoots)
+        chain.ChainPolicy.CustomTrustStore.Add(root);
+
+    return chain.Build(certificate);
+}
+
+static string ResolvePath(string path, string contentRoot)
+{
+    return Path.IsPathRooted(path)
+        ? path
+        : Path.GetFullPath(path, contentRoot);
+}

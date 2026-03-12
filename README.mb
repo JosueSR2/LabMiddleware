@@ -71,6 +71,27 @@ Key Configuration Areas:
 - Encoding definition
 - Retry policies
 - Security configuration
+
+OpenELIS Global Analyzer Endpoints (common defaults):
+- ASTM: https://<openelis-host>:8443/OpenELIS-Global/analyzer/astm
+- HL7:  https://<openelis-host>:8443/OpenELIS-Global/analyzer/hl7
+- If OpenELIS is behind an Nginx/API proxy, the path can be:
+  https://<openelis-host>/api/OpenELIS-Global/analyzer/astm (or /hl7)
+
+Routing Notes:
+- Configure LisUrlAstm and LisUrlHl7 so the middleware can route based on payload
+  format (HL7 -> /analyzer/hl7, ASTM -> /analyzer/astm).
+
+TLS Notes:
+- For production: keep server certificate validation enabled.
+- For dev/self-signed: either set AllowInvalidServerCertificate=true (temporary)
+  or provide a TrustStorePath (PKCS#12) so the middleware can validate the
+  OpenELIS certificate chain.
+- If the OpenELIS certificate SAN does not include the hostname you are using
+  (common when using https://localhost), set AllowServerCertificateNameMismatch=true
+  for local/dev only, or re-issue the server certificate with the correct SAN.
+- For mTLS: set ClientCertificatePath and ClientKeyPath (PEM) if OpenELIS
+  requires a client certificate.
 6. SECURITY
 Supported Features:
 - HTTPS (TLS 1.2+)

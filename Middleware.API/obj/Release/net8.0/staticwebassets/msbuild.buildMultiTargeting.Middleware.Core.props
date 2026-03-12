@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/Middleware.Core.props" />
-</Project>

@@ -109,7 +109,7 @@ namespace Middleware_Core.Protocols
                         buffer.Remove(0, 1);
 
                     if (string.Equals(computed, checksumHex, StringComparison.OrdinalIgnoreCase))
-                        records.Add(frameBody);
+                        records.Add(StripAstmFrameNumber(frameBody));
 
                     continue;
                 }
@@ -119,6 +119,19 @@ namespace Middleware_Core.Protocols
 
             if (records.Count > 0)
                 yield return string.Join("\n", records);
+        }
+
+        private static string StripAstmFrameNumber(string frameBody)
+        {
+            if (string.IsNullOrEmpty(frameBody))
+                return frameBody;
+
+            // ASTM LIS2-A2 frames begin with a single ASCII frame number (0-7) right
+            // after STX. OpenELIS readers expect lines to start with "H|", "P|", etc.
+            var first = frameBody[0];
+            return first is >= '0' and <= '7' && frameBody.Length > 1
+                ? frameBody[1..]
+                : frameBody;
         }
 
         private static string ComputeChecksumHex(string input)

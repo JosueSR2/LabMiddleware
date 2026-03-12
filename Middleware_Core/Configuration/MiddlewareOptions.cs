@@ -3,6 +3,8 @@ namespace Middleware_Core.Configuration
     public class MiddlewareOptions
     {
         public string LisUrl { get; set; } = string.Empty;
+        public string LisUrlAstm { get; set; } = string.Empty;
+        public string LisUrlHl7 { get; set; } = string.Empty;
         public string WatchFolder { get; set; } = "./TestingResources";
         public string OutboxDbPath { get; set; } = "./data/outbox.db";
         public int DeliveryBatchSize { get; set; } = 50;
@@ -22,6 +24,16 @@ namespace Middleware_Core.Configuration
         public string BasicUsername { get; set; } = string.Empty;
         public string BasicPassword { get; set; } = string.Empty;
         public bool AllowInvalidServerCertificate { get; set; }
+        public bool AllowServerCertificateNameMismatch { get; set; }
+
+        // Optional client TLS material (mTLS). Supports PEM cert+key or a PKCS#12 bundle.
+        public string ClientCertificatePath { get; set; } = string.Empty;
+        public string ClientKeyPath { get; set; } = string.Empty;
+
+        // Optional trust store (PKCS#12). When set, server certificate validation can be
+        // performed against these custom roots in addition to standard checks.
+        public string TrustStorePath { get; set; } = string.Empty;
+        public string TrustStorePassword { get; set; } = string.Empty;
     }
 
     public class ResilienceOptions
@@ -35,6 +47,7 @@ namespace Middleware_Core.Configuration
     {
         public LisPayloadMode PayloadMode { get; set; } = LisPayloadMode.RawMessage;
         public string ContentType { get; set; } = "text/plain";
+        public string Accept { get; set; } = "*/*";
         public bool SendOneRecordPerIncomingMessage { get; set; } = true;
     }
 
@@ -70,6 +83,9 @@ namespace Middleware_Core.Configuration
         public int BaudRate { get; set; } = 9600;
         public string? WatchFolder { get; set; }
         public string EncodingName { get; set; } = "utf-8";
+
+        // Optional: informational name for LIS/OpenELIS-side analyzer mapping.
+        public string LisAnalyzerName { get; set; } = string.Empty;
     }
 
     public class TcpOptions

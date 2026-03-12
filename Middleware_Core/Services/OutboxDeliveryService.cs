@@ -43,7 +43,7 @@ namespace Middleware_Core.Services
                             continue;
                         }
 
-                        var sendResult = await _lisSender.SendAsync(payload, _options.LisUrl, cancellationToken);
+                        var sendResult = await _lisSender.SendAsync(payload, cancellationToken);
                         if (sendResult.Success)
                         {
                             await _outboxRepository.MarkSentAsync(record.Id, cancellationToken);

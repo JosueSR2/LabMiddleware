@@ -25,6 +25,14 @@ namespace Middleware_Core.Services
                 TimeSpan.FromSeconds(Math.Max(1, options.Resilience.HttpTimeoutSeconds));
         }
 
+        public Task<LisSendResult> SendAsync(
+            LabResult result,
+            CancellationToken cancellationToken = default)
+        {
+            var lisUrl = ResolveLisUrl(result);
+            return SendAsync(result, lisUrl, cancellationToken);
+        }
+
         public async Task<LisSendResult> SendAsync(
             LabResult result,
             string lisUrl,
@@ -62,12 +70,19 @@ namespace Middleware_Core.Services
                     Content = new StringContent(payload, Encoding.UTF8, mediaType)
                 };
 
-                request.Content.Headers.ContentType =
-                    MediaTypeHeaderValue.Parse(contentType);
+                // StringContent already sets charset=utf-8. Only override when explicitly provided.
+                if (contentType.Contains("charset=", StringComparison.OrdinalIgnoreCase))
+                {
+                    request.Content.Headers.ContentType =
+                        MediaTypeHeaderValue.Parse(contentType);
+                }
 
-                // Accept universal para evitar problemas con LIS
-                request.Headers.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("*/*"));
+                // Prefer configured Accept; fall back to */*.
+                var acceptHeader = string.IsNullOrWhiteSpace(_options.LisDelivery.Accept)
+                    ? "*/*"
+                    : _options.LisDelivery.Accept;
+                request.Headers.Accept.Clear();
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
 
                 ApplyAuthorization(request);
 
@@ -163,9 +178,10 @@ namespace Middleware_Core.Services
         private string ProcessRawMessage(LabResult result)
         {
             if (IsHl7(result.RawMessage))
-                return ApplyHl7SendingApplication(
-                    result.RawMessage,
-                    result.SourceMachine);
+                return ApplyHl7SendingApplication(result.RawMessage,
+                    !string.IsNullOrWhiteSpace(result.AnalyzerId)
+                        ? result.AnalyzerId
+                        : result.SourceMachine);
 
             return result.RawMessage;
         }
@@ -195,6 +211,35 @@ namespace Middleware_Core.Services
                 return "application/hl7-v2";
 
             return "text/plain";
+        }
+
+        private string ResolveLisUrl(LabResult result)
+        {
+            var fallback = _options.LisUrl;
+            var astmUrl = string.IsNullOrWhiteSpace(_options.LisUrlAstm) ? fallback : _options.LisUrlAstm;
+            var hl7Url = string.IsNullOrWhiteSpace(_options.LisUrlHl7) ? fallback : _options.LisUrlHl7;
+
+            if (_options.LisDelivery.PayloadMode == LisPayloadMode.Hl7FromResult)
+                return hl7Url;
+
+            if (_options.LisDelivery.PayloadMode != LisPayloadMode.RawMessage)
+                return fallback;
+
+            var raw = result.RawMessage ?? string.Empty;
+            var trimmed = raw.TrimStart();
+
+            if (trimmed.StartsWith("MSH|", StringComparison.Ordinal))
+                return hl7Url;
+
+            // OpenELIS ASTM reader expects H| header, but route other record types as ASTM too.
+            if (trimmed.StartsWith("H|", StringComparison.Ordinal) ||
+                trimmed.StartsWith("P|", StringComparison.Ordinal) ||
+                trimmed.StartsWith("O|", StringComparison.Ordinal) ||
+                trimmed.StartsWith("R|", StringComparison.Ordinal) ||
+                trimmed.StartsWith("L|", StringComparison.Ordinal))
+                return astmUrl;
+
+            return fallback;
         }
 
         private void ApplyAuthorization(HttpRequestMessage request)
